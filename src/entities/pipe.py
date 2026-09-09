@@ -1,5 +1,5 @@
 import random
-from typing import List
+from typing import List, Tuple
 
 from ..utils import GameConfig
 from .entity import Entity
@@ -66,29 +66,29 @@ class Pipes(Entity):
             pipe.vel_x = 0
 
     def can_spawn_pipes(self) -> bool:
-        last = self.upper[-1]
-        if not last:
+        if not self.upper:
             return True
 
+        last = self.upper[-1]
         return self.config.window.width - (last.x + last.w) > last.w * 2.5
 
-    def spawn_new_pipes(self):
+    def spawn_new_pipes(self) -> None:
         # add new pipe when first pipe is about to touch left of screen
         upper, lower = self.make_random_pipes()
         self.upper.append(upper)
         self.lower.append(lower)
 
-    def remove_old_pipes(self):
-        # remove first pipe if its out of the screen
-        for pipe in self.upper:
-            if pipe.x < -pipe.w:
-                self.upper.remove(pipe)
+    def remove_old_pipes(self) -> None:
+        """Discard every off-screen pair without mutating a list mid-iteration."""
+        visible_pairs = [
+            (upper, lower)
+            for upper, lower in zip(self.upper, self.lower)
+            if upper.x >= -upper.w and lower.x >= -lower.w
+        ]
+        self.upper = [upper for upper, _ in visible_pairs]
+        self.lower = [lower for _, lower in visible_pairs]
 
-        for pipe in self.lower:
-            if pipe.x < -pipe.w:
-                self.lower.remove(pipe)
-
-    def spawn_initial_pipes(self):
+    def spawn_initial_pipes(self) -> None:
         upper_1, lower_1 = self.make_random_pipes()
         upper_1.x = self.config.window.width + upper_1.w * 3
         lower_1.x = self.config.window.width + upper_1.w * 3
@@ -101,7 +101,7 @@ class Pipes(Entity):
         self.upper.append(upper_2)
         self.lower.append(lower_2)
 
-    def make_random_pipes(self):
+    def make_random_pipes(self) -> Tuple[Pipe, Pipe]:
         """returns a randomly generated pipe"""
         # y of gap between upper and lower pipe
         base_y = self.config.window.viewport_height

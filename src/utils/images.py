@@ -16,12 +16,10 @@ class Images:
     pipe: Tuple[pygame.Surface]
 
     def __init__(self) -> None:
-        self.numbers = list(
-            (
-                pygame.image.load(f"assets/sprites/{num}.png").convert_alpha()
-                for num in range(10)
-            )
-        )
+        self.numbers = [
+            pygame.image.load(f"assets/sprites/{num}.png").convert_alpha()
+            for num in range(10)
+        ]
 
         # game over sprite
         self.game_over = pygame.image.load(

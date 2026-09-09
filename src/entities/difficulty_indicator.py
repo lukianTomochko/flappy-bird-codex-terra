@@ -34,7 +34,9 @@ class DifficultyIndicator(Entity):
             f"LEVEL {level + 1}  {self.pipes.speed:.1f}x", True, color
         )
         self.config.screen.blit(label, (x, y))
-        pygame.draw.rect(self.config.screen, (45, 55, 70), (x, y + 18, width, height))
+        pygame.draw.rect(
+            self.config.screen, (45, 55, 70), (x, y + 18, width, height)
+        )
         pygame.draw.rect(
             self.config.screen,
             color,

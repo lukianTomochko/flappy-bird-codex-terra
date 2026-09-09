@@ -13,6 +13,7 @@ dev = [
     "pygbag == 0.7.1",
     "black >= 22.1.0",
     "pre-commit >= 2.18.1",
+    "coverage >= 7.0",
     "flake8 >= 4.0.1",
     "isort >= 5.10.1"
     ]

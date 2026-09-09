@@ -2,7 +2,12 @@ from typing import List
 
 import pygame
 
-from ..utils import GameConfig, load_high_scores, save_high_scores
+from ..utils import (
+    GameConfig,
+    load_high_scores,
+    normalize_high_scores,
+    save_high_scores,
+)
 from .entity import Entity
 
 
@@ -12,6 +17,7 @@ class Score(Entity):
         self.y = self.config.window.height * 0.1
         self.score = 0
         self.high_scores: List[int] = load_high_scores()
+        self.leaderboard_font = pygame.font.SysFont("Arial", 18, bold=True)
 
     def reset(self) -> None:
         self.score = 0
@@ -25,7 +31,7 @@ class Score(Entity):
         if self.score <= 0:
             return False
 
-        updated_scores = sorted(self.high_scores + [self.score], reverse=True)[:5]
+        updated_scores = normalize_high_scores(self.high_scores + [self.score])
         is_high_score = self.score in updated_scores and (
             len(self.high_scores) < 5 or self.score >= self.high_scores[-1]
         )
@@ -35,13 +41,14 @@ class Score(Entity):
 
     def draw_high_scores(self) -> None:
         """Show the current top five below the game-over message."""
-        font = pygame.font.SysFont("Arial", 18, bold=True)
-        title = font.render("TOP 5", True, (255, 215, 70))
+        title = self.leaderboard_font.render("TOP 5", True, (255, 215, 70))
         x = (self.config.window.width - title.get_width()) // 2
         self.config.screen.blit(title, (x, self.config.window.height * 0.48))
 
         for index, value in enumerate(self.high_scores, start=1):
-            line = font.render(f"{index}. {value}", True, (255, 255, 255))
+            line = self.leaderboard_font.render(
+                f"{index}. {value}", True, (255, 255, 255)
+            )
             line_x = (self.config.window.width - line.get_width()) // 2
             self.config.screen.blit(
                 line, (line_x, self.config.window.height * 0.48 + index * 22)

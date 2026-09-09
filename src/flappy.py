@@ -44,7 +44,9 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
-            self.difficulty_indicator = DifficultyIndicator(self.config, self.pipes)
+            self.difficulty_indicator = DifficultyIndicator(
+                self.config, self.pipes
+            )
             await self.splash()
             await self.play()
             await self.game_over()
@@ -124,9 +126,10 @@ class Flappy:
         while True:
             for event in pygame.event.get():
                 self.check_quit_event(event)
-                if self.is_tap_event(event):
-                    if self.player.y + self.player.h >= self.floor.y - 1:
-                        return
+                if self.is_tap_event(event) and (
+                    self.player.y + self.player.h >= self.floor.y - 1
+                ):
+                    return
 
             self.background.tick()
             self.floor.tick()

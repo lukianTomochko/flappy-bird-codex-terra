@@ -11,11 +11,13 @@ from .welcome_message import WelcomeMessage
 __all__ = [
     "Background",
     "DifficultyIndicator",
+    "Entity",
     "Floor",
+    "GameOver",
     "Pipe",
     "Pipes",
     "Player",
+    "PlayerMode",
     "Score",
-    "Entity",
     "WelcomeMessage",
 ]

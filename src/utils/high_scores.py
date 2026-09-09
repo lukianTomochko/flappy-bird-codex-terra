@@ -2,13 +2,27 @@
 
 import json
 import os
+from collections.abc import Iterable
 from pathlib import Path
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-
 MAX_HIGH_SCORES = 5
 DEFAULT_HIGH_SCORE_FILE = Path("highscore.json")
+
+
+def normalize_high_scores(scores: Iterable[object]) -> List[int]:
+    """Return the descending top five non-negative integer scores.
+
+    Keeping this policy in one place ensures loading, saving, and in-memory
+    leaderboard updates agree on which values are valid.
+    """
+    valid_scores = (
+        score
+        for score in scores
+        if isinstance(score, int) and not isinstance(score, bool) and score >= 0
+    )
+    return sorted(valid_scores, reverse=True)[:MAX_HIGH_SCORES]
 
 
 def load_high_scores(path: Optional[Path] = None) -> List[int]:
@@ -30,21 +44,19 @@ def load_high_scores(path: Optional[Path] = None) -> List[int]:
     ):
         return []
 
-    raw_scores = payload.get("scores", []) if isinstance(payload, dict) else payload
+    raw_scores = (
+        payload.get("scores", []) if isinstance(payload, dict) else payload
+    )
     if not isinstance(raw_scores, list):
         return []
 
-    scores = [score for score in raw_scores if isinstance(score, int) and score >= 0]
-    return sorted(scores, reverse=True)[:MAX_HIGH_SCORES]
+    return normalize_high_scores(raw_scores)
 
 
 def save_high_scores(scores: List[int], path: Optional[Path] = None) -> bool:
     """Persist up to five valid scores and return whether the operation worked."""
     score_file = path or DEFAULT_HIGH_SCORE_FILE
-    valid_scores = sorted(
-        (score for score in scores if isinstance(score, int) and score >= 0),
-        reverse=True,
-    )[:MAX_HIGH_SCORES]
+    valid_scores = normalize_high_scores(scores)
 
     temporary_file = None
     try:
