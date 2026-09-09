@@ -1,4 +1,5 @@
 from .background import Background
+from .difficulty_indicator import DifficultyIndicator
 from .entity import Entity
 from .floor import Floor
 from .game_over import GameOver
@@ -9,6 +10,7 @@ from .welcome_message import WelcomeMessage
 
 __all__ = [
     "Background",
+    "DifficultyIndicator",
     "Floor",
     "Pipe",
     "Pipes",

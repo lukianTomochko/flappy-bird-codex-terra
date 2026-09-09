@@ -6,6 +6,7 @@ from pygame.locals import K_ESCAPE, K_SPACE, K_UP, KEYDOWN, QUIT
 
 from .entities import (
     Background,
+    DifficultyIndicator,
     Floor,
     GameOver,
     Pipes,
@@ -43,6 +44,7 @@ class Flappy:
             self.game_over_message = GameOver(self.config)
             self.pipes = Pipes(self.config)
             self.score = Score(self.config)
+            self.difficulty_indicator = DifficultyIndicator(self.config, self.pipes)
             await self.splash()
             await self.play()
             await self.game_over()
@@ -90,9 +92,10 @@ class Flappy:
             if self.player.collided(self.pipes, self.floor):
                 return
 
-            for i, pipe in enumerate(self.pipes.upper):
+            for pipe in self.pipes.upper:
                 if self.player.crossed(pipe):
                     self.score.add()
+                    self.pipes.register_passed_pipe()
 
             for event in pygame.event.get():
                 self.check_quit_event(event)
@@ -103,6 +106,7 @@ class Flappy:
             self.floor.tick()
             self.pipes.tick()
             self.score.tick()
+            self.difficulty_indicator.tick()
             self.player.tick()
 
             pygame.display.update()
@@ -115,6 +119,7 @@ class Flappy:
         self.player.set_mode(PlayerMode.CRASH)
         self.pipes.stop()
         self.floor.stop()
+        self.score.record_result()
 
         while True:
             for event in pygame.event.get():
@@ -127,6 +132,7 @@ class Flappy:
             self.floor.tick()
             self.pipes.tick()
             self.score.tick()
+            self.score.draw_high_scores()
             self.player.tick()
             self.game_over_message.tick()
 

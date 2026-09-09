@@ -8,7 +8,7 @@ from .entity import Entity
 class Pipe(Entity):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.vel_x = -5
+        self.vel_x = -Pipes.INITIAL_SPEED
 
     def draw(self) -> None:
         self.x += self.vel_x
@@ -16,6 +16,9 @@ class Pipe(Entity):
 
 
 class Pipes(Entity):
+    INITIAL_SPEED = 5.0
+    SPEED_INCREMENT = 0.5
+    PIPES_PER_LEVEL = 5
     upper: List[Pipe]
     lower: List[Pipe]
 
@@ -26,7 +29,28 @@ class Pipes(Entity):
         self.bottom = self.config.window.viewport_height
         self.upper = []
         self.lower = []
+        self.passed_pipes = 0
+        self.difficulty_level = 0
         self.spawn_initial_pipes()
+
+    @property
+    def speed(self) -> float:
+        return self.INITIAL_SPEED + self.difficulty_level * self.SPEED_INCREMENT
+
+    @property
+    def pipes_until_next_level(self) -> int:
+        return self.PIPES_PER_LEVEL - (self.passed_pipes % self.PIPES_PER_LEVEL)
+
+    def register_passed_pipe(self) -> bool:
+        """Record a cleared pipe and return True when the level advances."""
+        self.passed_pipes += 1
+        if self.passed_pipes % self.PIPES_PER_LEVEL:
+            return False
+
+        self.difficulty_level += 1
+        for pipe in self.upper + self.lower:
+            pipe.vel_x = -self.speed
+        return True
 
     def tick(self) -> None:
         if self.can_spawn_pipes():
@@ -100,5 +124,7 @@ class Pipes(Entity):
             pipe_x,
             gap_y + self.pipe_gap,
         )
+        upper_pipe.vel_x = -self.speed
+        lower_pipe.vel_x = -self.speed
 
         return upper_pipe, lower_pipe
